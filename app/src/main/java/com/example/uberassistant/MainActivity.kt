@@ -3,12 +3,10 @@ package com.example.uberassistant
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
-import android.icu.lang.UCharacter
 import android.location.Address
 import android.location.Geocoder
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
@@ -42,7 +40,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(mBinding.root)
         getPermissions()
         fusedLocationClient = FusedLocationProviderClient(this)
-        mViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.application).create(RestaurantViewModel::class.java)
+        mViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
+            .create(RestaurantViewModel::class.java)
         setDestination()
         setSource()
         mViewModel.getRestaurants().observe(this, Observer {
@@ -57,7 +56,8 @@ class MainActivity : AppCompatActivity() {
         mAdapter = RestaurantAdapter(restaurantList, this)
         mBinding.restaurantRv.apply {
             adapter = mAdapter
-            layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
+            layoutManager =
+                LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
         }
     }
 
@@ -73,49 +73,63 @@ class MainActivity : AppCompatActivity() {
     private fun checkPermissions(callbackId: Int, vararg permissionsId: String) {
         var permissions = true
         for (p in permissionsId) {
-            permissions = permissions && ContextCompat.checkSelfPermission(this, p) == PackageManager.PERMISSION_GRANTED
+            permissions = permissions && ContextCompat.checkSelfPermission(
+                this,
+                p
+            ) == PackageManager.PERMISSION_GRANTED
         }
         if (!permissions) ActivityCompat.requestPermissions(this, permissionsId, callbackId)
     }
 
     @SuppressLint("MissingPermission")
     private fun setSource() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
             getPermissions()
             return
         }
         fusedLocationClient.lastLocation.addOnSuccessListener {
-            if(it == null) {
+            if (it == null) {
                 Utils.showLongToast("location not found", this)
-            }
-            else {
+            } else {
                 val location = Geocoder(this).getFromLocation(it.latitude, it.longitude, 1)
-                if(location.size > 0) {
+                if (location.size > 0) {
                     source = location[0]
-                    if(source.getAddressLine(0)?.isNotEmpty() == true && destination.getAddressLine(0)?.isNotEmpty() == true)
-                    startActivity(IntentFactory.getOneTapRideIntent(this, source.getAddressLine(0), destination.getAddressLine(0), getPrice()))
-                }
-                else {
+                    if (source.getAddressLine(0)
+                            ?.isNotEmpty() == true && destination.getAddressLine(0)
+                            ?.isNotEmpty() == true
+                    )
+                        startActivity(
+                            IntentFactory.getOneTapRideIntent(
+                                this,
+                                source.getAddressLine(0),
+                                destination.getAddressLine(0),
+                                getPrice()
+                            )
+                        )
+                } else {
                     Utils.showLongToast("no source found", this)
                 }
             }
         }
     }
 
-    private fun getPrice() = (Random.nextFloat()*100+100).roundToInt().toFloat()
+    private fun getPrice() = (Random.nextFloat() * 100 + 100).roundToInt().toFloat()
 
 
     private fun setDestination() {
         val resolver = CalendarContentResolver(this)
         resolver.getEvents().forEach {
             val location = Geocoder(this).getFromLocationName(it, 1)
-            if(location.size > 0)
+            if (location.size > 0)
                 locations.add(location[0])
         }
-        if(locations.size > 0) {
+        if (locations.size > 0) {
             destination = locations[0]
-        }
-        else {
+        } else {
             Utils.showLongToast("no destination found", this)
         }
     }

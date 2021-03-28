@@ -1,9 +1,13 @@
 package com.example.uberassistant
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.example.uberassistant.databinding.ActivityOneTapRideBookingBinding
 import com.example.uberassistant.utils.Constants
+import java.math.BigDecimal
+import java.text.Format
+import java.text.NumberFormat
+import java.util.*
 
 class OneTapRideBookingActivity : AppCompatActivity() {
 
@@ -36,10 +40,15 @@ class OneTapRideBookingActivity : AppCompatActivity() {
         }
     }
 
+    private fun getIndianRupee(value: String?): String? {
+        val format: Format = NumberFormat.getCurrencyInstance(Locale("en", "in"))
+        return format.format(BigDecimal(value))
+    }
+
     private fun updateUI() {
         mBinding.source.text = source
         mBinding.destination.text = destination
-        mBinding.price.text = price.toString()
+        mBinding.price.text = getIndianRupee(price.toString())
     }
 
 }

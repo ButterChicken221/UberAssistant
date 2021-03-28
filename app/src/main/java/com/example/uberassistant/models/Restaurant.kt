@@ -3,10 +3,11 @@ package com.example.uberassistant.models
 data class Restaurant(
     val id: String,
     val name: String,
-    val rating: Float,
-    val openTime: Long,
-    val closingTime: Long,
-    val cuisines: List<String>,
-    val costForOne: Int,
-    val slotsAvailable: Int
+    val rating: String,
+    val openTime: Long = 0,
+    val closingTime: Long = 0,
+    val cuisines: List<String>? = null,
+    val costForOne: Int = 0,
+    val slotsAvailable: Int = 0,
+    val imageUrl: String = "",
 )

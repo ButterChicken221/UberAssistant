@@ -2,7 +2,6 @@ package com.example.uberassistant.network.services
 
 import com.example.uberassistant.models.Ride
 import com.example.uberassistant.models.User
-import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query

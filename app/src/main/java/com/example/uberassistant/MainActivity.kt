@@ -15,8 +15,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.uberassistant.databinding.ActivityMainBinding
+import com.example.uberassistant.models.Location
+import com.example.uberassistant.models.PaymentInfo
+import com.example.uberassistant.models.Ride
 import com.example.uberassistant.utils.CalendarContentResolver
 import com.example.uberassistant.utils.IntentFactory
 import com.example.uberassistant.utils.Utils
@@ -44,39 +48,16 @@ class MainActivity : AppCompatActivity() {
         getPermissions()
         fusedLocationClient = FusedLocationProviderClient(this)
         setDestination()
-        createNotificationChannel()
-        createNotification()
-    }
-
-    private fun createNotification() {
-
-        val builder = NotificationCompat.Builder(this, "1234")
-            .setContentTitle("Hello this is a notification")
-            .setSmallIcon(R.drawable.ic_paytm)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            builder.setChannelId("123")
-        }
-        with(NotificationManagerCompat.from(this)) {
-            notify(1234, builder.build())
-        }
-    }
-
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "ride_notification"
-            val descriptionText = "Time to go"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel("123", name, importance).apply {
-                description = descriptionText
+        mViewModel.getSuggestedRide().observe(this, Observer {
+            it?.let {
+                startActivity(
+                    IntentFactory.getOneTapRideIntent(
+                        this,
+                        it
+                    )
+                )
             }
-            // Register the channel with the system
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-
+        })
     }
 
     private fun getPermissions() {
@@ -113,24 +94,20 @@ class MainActivity : AppCompatActivity() {
             if (it == null) {
                 Utils.showLongToast("location not found", this)
             } else {
-                val location = Geocoder(this).getFromLocation(it.latitude, it.longitude, 1)
-                if (location.size > 0) {
-                    source = location[0]
-                    if (source.getAddressLine(0)
-                            ?.isNotEmpty() == true && destination.getAddressLine(0)
-                            ?.isNotEmpty() == true
-                    )
-                        startActivity(
-                            IntentFactory.getOneTapRideIntent(
-                                this,
-                                source.getAddressLine(0),
-                                destination.getAddressLine(0),
-                                getPrice()
-                            )
+                startActivity(
+                    IntentFactory.getOneTapRideIntent(
+                        this,
+                        Ride(
+                            Location(it.latitude, it.longitude),
+                            Location(destination.latitude, destination.longitude),
+                            getPrice(),
+                            System.currentTimeMillis(),
+                            System.currentTimeMillis() + 30*60*1000,
+                            0,
+                            PaymentInfo(0,"123456789")
                         )
-                } else {
-                    Utils.showLongToast("no source found", this)
-                }
+                    )
+                )
             }
         }
     }

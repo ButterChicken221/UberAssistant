@@ -4,4 +4,5 @@ object Constants {
     const val SOURCE = "source"
     const val DESTINATION = "destination"
     const val PRICE = "price"
+    const val RIDE = "ride"
 }

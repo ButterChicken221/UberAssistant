@@ -1,9 +1,16 @@
 package com.example.uberassistant
 
+import android.content.Context
+import android.location.Geocoder
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.uberassistant.databinding.ActivityOneTapRideBookingBinding
+import com.example.uberassistant.models.Location
+import com.example.uberassistant.models.Ride
 import com.example.uberassistant.utils.Constants
+import com.example.uberassistant.utils.Utils.getAddress
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.math.BigDecimal
 import java.text.Format
 import java.text.NumberFormat
@@ -12,31 +19,21 @@ import java.util.*
 class OneTapRideBookingActivity : AppCompatActivity() {
 
     private lateinit var mBinding: ActivityOneTapRideBookingBinding
-    private var source = ""
-    private var destination = ""
-    private var price = 0f
+    private var ride: Ride? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = ActivityOneTapRideBookingBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
         setData()
-        if(!isValidData()) {
-            finish()
-            return
-        }
         updateUI()
-    }
-
-    private fun isValidData(): Boolean {
-        return source.isNotEmpty() && destination.isNotEmpty() && price > 0f
     }
 
     private fun setData() {
         intent.extras?.apply {
-            source = getString(Constants.SOURCE) ?: ""
-            destination = getString(Constants.DESTINATION) ?: ""
-            price = getFloat(Constants.PRICE)
+            get("ride")?.let {
+                ride = Gson().fromJson(it.toString(), object : TypeToken<Ride>() {}.type)
+            }
         }
     }
 
@@ -46,9 +43,9 @@ class OneTapRideBookingActivity : AppCompatActivity() {
     }
 
     private fun updateUI() {
-        mBinding.source.text = source
-        mBinding.destination.text = destination
-        mBinding.price.text = getIndianRupee(price.toString())
+        mBinding.source.text = getAddress(this, ride?.source)
+        mBinding.destination.text = getAddress(this, ride?.destination)
+        mBinding.price.text = getIndianRupee(ride?.fare.toString())
     }
 
 }

@@ -18,9 +18,9 @@ object Utils {
 
     fun getAddress(context: Context, location: Location?): String {
         var address = ""
-        if(location?.lat != null) {
+        if(location?.latitude != null) {
             try {
-                address = Geocoder(context).getFromLocation(location.lat, location.long, 1)[0].getAddressLine(0)
+                address = Geocoder(context).getFromLocation(location.latitude, location.longitude, 1)[0].getAddressLine(0)
             }
             catch (ex: Exception) {
 

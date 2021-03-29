@@ -10,7 +10,10 @@ import android.location.Address
 import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -38,7 +41,7 @@ class MainActivity : AppCompatActivity() {
     private val locations = ArrayList<Address>()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var destination: Address
-    private lateinit var source: Address
+    private lateinit var source: Location
     private lateinit var mViewModel: UberRideViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,17 +52,8 @@ class MainActivity : AppCompatActivity() {
         mViewModel.getUsers()
         getPermissions()
         fusedLocationClient = FusedLocationProviderClient(this)
-        setDestination()
-        mViewModel.getSuggestedRide().observe(this, Observer {
-            it?.let {
-                startActivity(
-                    IntentFactory.getOneTapRideIntent(
-                        this,
-                        it
-                    )
-                )
-            }
-        })
+        setSource()
+        mBinding.loadingAnim.playAnimation()
         FirebaseInstanceId.getInstance().instanceId.addOnSuccessListener {
             Log.d("shakti", "onCreate: ${it.token}")
         }
@@ -99,28 +93,36 @@ class MainActivity : AppCompatActivity() {
             if (it == null) {
                 Utils.showLongToast("location not found", this)
             } else {
-                startActivity(
-                    IntentFactory.getOneTapRideIntent(
-                        this,
-                        Ride(
-                            Location(it.latitude, it.longitude),
-                            Location(destination.latitude, destination.longitude),
-                            getPrice(),
-                            System.currentTimeMillis(),
-                            System.currentTimeMillis() + 30*60*1000,
-                            0,
-                            PaymentInfo(0,"123456789")
-                        )
-                    )
-                )
+                source = Location(it.latitude, it.longitude)
+                checkForRide()
             }
         }
+    }
+
+    private fun checkForRide() {
+        mViewModel.getSuggestedRide(source.latitude, source.longitude).observe(this, Observer {
+            if(it != null) {
+                setupRide(it)
+            }
+            else {
+                checkForCalendarEvent()
+            }
+        })
+    }
+
+    private fun setupRide(ride: Ride) {
+        ride.sourceString = Utils.getAddress(this, ride.source)
+        ride.destinationString = Utils.getAddress(this, ride.destination)
+        Handler(Looper.getMainLooper()).postDelayed(Runnable {
+            mBinding.loadingText.visibility = View.GONE
+            startActivity(IntentFactory.getOneTapRideIntent(this, ride))
+        }, 1000)
     }
 
     private fun getPrice() = (Random.nextFloat() * 100 + 100).roundToInt().toFloat()
 
 
-    private fun setDestination() {
+    private fun checkForCalendarEvent() {
         val resolver = CalendarContentResolver(this)
         resolver.getEvents().forEach {
             val location = Geocoder(this).getFromLocationName(it, 1)
@@ -129,9 +131,15 @@ class MainActivity : AppCompatActivity() {
         }
         if (locations.size > 0) {
             destination = locations[0]
-            setSource()
-        } else {
-            Utils.showLongToast("no destination found", this)
+            setupRide(Ride(
+                Location(source.latitude, source.longitude),
+                Location(destination.latitude, destination.longitude),
+                getPrice(),
+                "",
+                "",
+                0,
+                PaymentInfo(0,"123456789")
+            ))
         }
     }
 

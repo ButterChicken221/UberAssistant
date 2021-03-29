@@ -1,13 +1,15 @@
 package com.example.uberassistant.models
 
 data class Ride(
-    val source: Location,
+    var source: Location,
     val destination: Location,
     val fare: Float,
-    val startTime: Long,
-    val endTime: Long,
-    val cabType: Int,
-    val paymentInfo: PaymentInfo
+    val startTime: String,
+    val endTime: String,
+    val cabTypeCode: Int,
+    val paymentInfo: PaymentInfo,
+    var sourceString: String = "",
+    var destinationString: String = ""
 )
 
 data class PaymentInfo(
@@ -16,6 +18,6 @@ data class PaymentInfo(
 )
 
 data class Location(
-    val lat: Double,
-    val long: Double
+    val latitude: Double,
+    val longitude: Double
 )

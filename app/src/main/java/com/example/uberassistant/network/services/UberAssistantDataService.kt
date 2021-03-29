@@ -14,9 +14,13 @@ interface UberAssistantDataService {
         @Query("size") size: Int = 100
     ): Call<List<Ride>>
 
-    @GET("/ride/history/suggest")
+    @GET("/ride/suggest")
     fun getSuggestedRide(
-        @Query("userId") userId: Int
+        @Query("userId") userId: Int,
+        @Query("currLat") currLat: Double,
+        @Query("currLong") currLong: Double,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 100
     ): Call<Ride>
 
     @GET("/users")

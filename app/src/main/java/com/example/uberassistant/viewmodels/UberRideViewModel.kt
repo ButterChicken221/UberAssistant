@@ -16,9 +16,9 @@ class UberRideViewModel: ViewModel() {
 
     private val service: UberAssistantDataService = RetrofitClientInstance.retrofitInstance!!.create(UberAssistantDataService::class.java)
 
-    fun getSuggestedRide(): MutableLiveData<Ride?> {
+    fun getSuggestedRide(currLat: Double, currLong: Double): MutableLiveData<Ride?> {
         val data = MutableLiveData<Ride?>()
-        val call: Call<Ride> = service.getSuggestedRide(1)
+        val call: Call<Ride> = service.getSuggestedRide(1, currLat, currLong)
         call.enqueue(object : Callback<Ride> {
             override fun onResponse(call: Call<Ride>, response: Response<Ride>) {
                 data.postValue(response.body())

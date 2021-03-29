@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClientInstance {
     private var retrofit: Retrofit? = null
-    private const val BASE_URL = ""
+    private const val BASE_URL = "https://eebc7697e710.ngrok.io"
     val retrofitInstance: Retrofit?
         get() {
             if (retrofit == null) {

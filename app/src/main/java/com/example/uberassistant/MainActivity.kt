@@ -15,10 +15,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import com.example.uberassistant.databinding.ActivityMainBinding
 import com.example.uberassistant.utils.CalendarContentResolver
 import com.example.uberassistant.utils.IntentFactory
 import com.example.uberassistant.utils.Utils
+import com.example.uberassistant.viewmodels.UberRideViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
@@ -31,11 +33,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var destination: Address
     private lateinit var source: Address
+    private lateinit var mViewModel: UberRideViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
+        mViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.application).create(UberRideViewModel::class.java)
+        mViewModel.getUsers()
         getPermissions()
         fusedLocationClient = FusedLocationProviderClient(this)
         setDestination()

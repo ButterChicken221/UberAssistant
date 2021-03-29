@@ -10,6 +10,7 @@ import android.location.Address
 import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -26,6 +27,7 @@ import com.example.uberassistant.utils.IntentFactory
 import com.example.uberassistant.utils.Utils
 import com.example.uberassistant.viewmodels.UberRideViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.firebase.iid.FirebaseInstanceId
 import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 import kotlin.random.Random
@@ -58,6 +60,9 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         })
+        FirebaseInstanceId.getInstance().instanceId.addOnSuccessListener {
+            Log.d("shakti", "onCreate: ${it.token}")
+        }
     }
 
     private fun getPermissions() {

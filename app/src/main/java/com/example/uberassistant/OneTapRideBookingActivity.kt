@@ -3,12 +3,14 @@ package com.example.uberassistant
 import android.content.Context
 import android.location.Geocoder
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.uberassistant.databinding.ActivityOneTapRideBookingBinding
 import com.example.uberassistant.models.Location
 import com.example.uberassistant.models.Ride
 import com.example.uberassistant.utils.Constants
 import com.example.uberassistant.utils.Utils.getAddress
+import com.google.firebase.iid.FirebaseInstanceId
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.math.BigDecimal

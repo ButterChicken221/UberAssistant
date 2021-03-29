@@ -2,33 +2,31 @@ package com.example.uberassistant
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.uberassistant.adapters.RestaurantAdapter
 import com.example.uberassistant.databinding.ActivityMainBinding
-import com.example.uberassistant.models.Restaurant
 import com.example.uberassistant.utils.CalendarContentResolver
 import com.example.uberassistant.utils.IntentFactory
 import com.example.uberassistant.utils.Utils
-import com.example.uberassistant.viewmodels.RestaurantViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
+import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mBinding: ActivityMainBinding
-    private var restaurantList = ArrayList<Restaurant>()
-    private lateinit var mAdapter: RestaurantAdapter
-    private lateinit var mViewModel: RestaurantViewModel
     private val locations = ArrayList<Address>()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var destination: Address
@@ -40,25 +38,40 @@ class MainActivity : AppCompatActivity() {
         setContentView(mBinding.root)
         getPermissions()
         fusedLocationClient = FusedLocationProviderClient(this)
-        mViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.application)
-            .create(RestaurantViewModel::class.java)
         setDestination()
-        setSource()
-        mViewModel.getRestaurants().observe(this, Observer {
-            it?.let {
-                restaurantList.addAll(it)
-                setupRestaurantRv()
-            }
-        })
+        createNotificationChannel()
+        createNotification()
     }
 
-    private fun setupRestaurantRv() {
-        mAdapter = RestaurantAdapter(restaurantList, this)
-        mBinding.restaurantRv.apply {
-            adapter = mAdapter
-            layoutManager =
-                LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, false)
+    private fun createNotification() {
+
+        val builder = NotificationCompat.Builder(this, "1234")
+            .setContentTitle("Hello this is a notification")
+            .setSmallIcon(R.drawable.ic_paytm)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId("123")
         }
+        with(NotificationManagerCompat.from(this)) {
+            notify(1234, builder.build())
+        }
+    }
+
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "ride_notification"
+            val descriptionText = "Time to go"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel("123", name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+
     }
 
     private fun getPermissions() {
@@ -129,6 +142,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (locations.size > 0) {
             destination = locations[0]
+            setSource()
         } else {
             Utils.showLongToast("no destination found", this)
         }

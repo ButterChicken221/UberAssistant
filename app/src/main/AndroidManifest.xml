@@ -17,7 +17,6 @@
         <activity android:name=".OneTapRideBookingActivity"
             android:theme="@style/Theme.AppCompat.Transparent.NoActionBar">
         </activity>
-        <activity android:name=".RestaurantDetailsActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
